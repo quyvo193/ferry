@@ -1,0 +1,21 @@
+# Build output
+/bin/
+/dist/
+*.exe
+*.test
+
+# Profiling / coverage
+*.out
+*.prof
+coverage.*
+
+# Ferry runtime artifacts
+*.part
+*.part.meta
+/testdata/large/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

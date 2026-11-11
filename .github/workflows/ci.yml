@@ -1,0 +1,47 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: gofmt
+        if: runner.os != 'Windows'
+        run: test -z "$(gofmt -s -l .)" || (gofmt -s -l . && exit 1)
+
+      - name: vet
+        run: go vet ./...
+
+      - name: test (race)
+        if: runner.os != 'Windows'
+        run: go test -race ./...
+
+      - name: test
+        if: runner.os == 'Windows'
+        run: go test ./...
+
+      - name: build
+        run: go build ./cmd/ferry
+
+  cross:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: cross-compile all targets
+        run: make cross
