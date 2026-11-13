@@ -4,7 +4,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net"
 	"os"
+	"strconv"
+
+	"github.com/quyvo193/ferry/internal/transfer"
 )
 
 // runListen makes this device discoverable and receives incoming transfers.
@@ -37,5 +41,12 @@ func runListen(args []string) error {
 		return err
 	}
 
-	return nil
+	ln, err := net.Listen("tcp", net.JoinHostPort("", strconv.Itoa(*port)))
+	if err != nil {
+		return err
+	}
+
+	defer ln.Close()
+	r := &transfer.Receiver{Dir: *dir}
+	return r.Serve(ln)
 }
