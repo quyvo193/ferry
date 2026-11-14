@@ -2,9 +2,11 @@ package transfer
 
 import (
 	"errors"
+	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net"
+	"time"
 )
 
 type Receiver struct {
@@ -20,28 +22,37 @@ func (r *Receiver) Serve(ln net.Listener) error {
 				return nil
 			}
 
-			log.Printf("accept connection fail %v\n", err)
+			slog.Error("accept connection fail %v", err)
 			continue
 		}
 
 		go func(conn net.Conn) {
 			defer conn.Close()
 			if err := r.receive(conn); err != nil {
-				log.Printf("%s: %v", conn.RemoteAddr(), err)
+				slog.Error("%s: %v", conn.RemoteAddr().String(), err)
 			}
 		}(conn)
 	}
 }
 
 func (r *Receiver) receive(src io.Reader) error {
-	fname := make([]byte, 1024)
-	fsize := make([]byte, 1024)
-	_, err := io.ReadFull(src, fname)
-	_, err = io.ReadFull(src, fsize)
+	h, err := readHeader(src)
 
 	if err != nil {
 		return err
 	}
 
+	var dst io.Writer = io.Discard
+
+	start := time.Now()
+
+	n, err := io.CopyN(dst, src, h.Size)
+	if err != nil {
+		return fmt.Errorf("copy data: %w", err)
+	}
+
+	secs := time.Since(start).Seconds()
+	slog.Error("received %q: %d bytes in %.2fs (%.1f MB/s, %.1f Mbit/s)",
+		h.Name, n, secs, float64(n)/1e6/secs, float64(n)*8/1e6/secs)
 	return nil
 }
