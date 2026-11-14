@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"net"
 
 	"github.com/quyvo193/ferry/internal/transfer"
 )
@@ -27,10 +26,6 @@ func runSend(args []string) error {
 
 	if fs.NArg() != 2 {
 		return fmt.Errorf("usage: ferry send <ip:port> <file>")
-	}
-
-	if _, _, err := net.SplitHostPort(addr); err != nil {
-		return fmt.Errorf("invalid addr %q: %w", addr, err)
 	}
 
 	s := &transfer.Sender{BufSize: 32 << 10}
