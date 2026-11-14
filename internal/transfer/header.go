@@ -65,14 +65,6 @@ func isSafeName(name string) bool {
 }
 
 func writeHeader(w io.Writer, h Header) error {
-	if len(h.Name) == 0 || len(h.Name) > maxNameLen || !isSafeName(h.Name) {
-		return fmt.Errorf("%w: %q", ErrInvalidName, h.Name)
-	}
-
-	if h.Size < 0 {
-		return fmt.Errorf("%w: %d", ErrInvalidSize, h.Size)
-	}
-
 	buf := make([]byte, 0, 2+len(h.Name)+8)
 	buf = binary.BigEndian.AppendUint16(buf, uint16(len(h.Name)))
 	buf = append(buf, h.Name...)
@@ -81,4 +73,16 @@ func writeHeader(w io.Writer, h Header) error {
 	_, err := w.Write(buf)
 
 	return err
+}
+
+func validate(name string, size int) error {
+	if len(name) == 0 || len(name) > maxNameLen || !isSafeName(name) {
+		return fmt.Errorf("%w: %q", ErrInvalidName, name)
+	}
+
+	if size < 0 {
+		return fmt.Errorf("%w: %d", ErrInvalidSize, size)
+	}
+
+	return nil
 }
