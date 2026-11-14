@@ -63,3 +63,22 @@ func isSafeName(name string) bool {
 		filepath.IsLocal(name) &&
 		!strings.ContainsAny(name, `/\`)
 }
+
+func writeHeader(w io.Writer, h Header) error {
+	if len(h.Name) == 0 || len(h.Name) > maxNameLen || !isSafeName(h.Name) {
+		return fmt.Errorf("%w: %q", ErrInvalidName, h.Name)
+	}
+
+	if h.Size < 0 {
+		return fmt.Errorf("%w: %d", ErrInvalidSize, h.Size)
+	}
+
+	buf := make([]byte, 0, 2+len(h.Name)+8)
+	buf = binary.BigEndian.AppendUint16(buf, uint16(len(h.Name)))
+	buf = append(buf, h.Name...)
+	buf = binary.BigEndian.AppendUint64(buf, uint64(h.Size))
+
+	_, err := w.Write(buf)
+
+	return err
+}
