@@ -6,6 +6,8 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -42,15 +44,36 @@ func (r *Receiver) receive(src io.Reader) error {
 		return err
 	}
 
-	var dst io.Writer = io.Discard
+	final := filepath.Join(r.Dir, h.Name)
+	if _, err := os.Lstat(final); err == nil {
+		return fmt.Errorf("%s: already exists", final)
+	}
+
+	f, err := os.Create(h.Name)
+	if err != nil {
+		return err
+	}
+
+	part := final + ".part"
+	done := false
+	defer func() {
+		if !done {
+			f.Close()
+			os.Remove(part)
+		}
+	}()
 
 	start := time.Now()
 
-	n, err := io.CopyN(dst, src, h.Size)
+	n, err := io.CopyN(f, src, h.Size)
 	if err != nil {
 		return fmt.Errorf("copy data: %w", err)
 	}
 
+	if err := os.Rename(part, final); err != nil {
+		return err
+	}
+	done = true
 	secs := time.Since(start).Seconds()
 	slog.Info("received",
 		"name", h.Name,
