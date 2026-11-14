@@ -39,41 +39,16 @@ func (r *Receiver) Serve(ln net.Listener) error {
 
 func (r *Receiver) receive(src io.Reader) error {
 	h, err := readHeader(src)
-
 	if err != nil {
-		return err
+		return fmt.Errorf("read header: %w", err)
 	}
-
-	final := filepath.Join(r.Dir, h.Name)
-	if _, err := os.Lstat(final); err == nil {
-		return fmt.Errorf("%s: already exists", final)
-	}
-
-	f, err := os.Create(h.Name)
-	if err != nil {
-		return err
-	}
-
-	part := final + ".part"
-	done := false
-	defer func() {
-		if !done {
-			f.Close()
-			os.Remove(part)
-		}
-	}()
 
 	start := time.Now()
-
-	n, err := io.CopyN(f, src, h.Size)
+	n, err := r.store(src, h)
 	if err != nil {
-		return fmt.Errorf("copy data: %w", err)
-	}
-
-	if err := os.Rename(part, final); err != nil {
 		return err
 	}
-	done = true
+
 	secs := time.Since(start).Seconds()
 	slog.Info("received",
 		"name", h.Name,
@@ -83,4 +58,42 @@ func (r *Receiver) receive(src io.Reader) error {
 	)
 
 	return nil
+}
+
+func (r *Receiver) store(src io.Reader, h Header) (int64, error) {
+	if r.Discard {
+		return io.CopyN(io.Discard, src, h.Size)
+	}
+
+	final := filepath.Join(r.Dir, h.Name)
+	if _, err := os.Lstat(final); err == nil {
+		return 0, fmt.Errorf("%s: already exists", final)
+	}
+
+	part := final + ".part"
+	f, err := os.OpenFile(part, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		return 0, err
+	}
+	done := false
+	defer func() {
+		if !done {
+			f.Close()
+			os.Remove(part)
+		}
+	}()
+
+	n, err := io.CopyN(f, src, h.Size)
+	if err != nil {
+		return n, fmt.Errorf("copy data: got %d/%d bytes: %w", n, h.Size, err)
+	}
+
+	if err := f.Close(); err != nil {
+		return n, fmt.Errorf("close %s: %w", part, err)
+	}
+	if err := os.Rename(part, final); err != nil {
+		return n, err
+	}
+	done = true
+	return n, nil
 }

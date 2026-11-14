@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"strconv"
@@ -45,6 +46,8 @@ func runListen(args []string) error {
 	if err != nil {
 		return err
 	}
+
+	slog.Info("listening on", "port", *port)
 
 	defer ln.Close()
 	r := &transfer.Receiver{Dir: *dir}
