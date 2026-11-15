@@ -14,7 +14,6 @@ import (
 
 // runListen makes this device discoverable and receives incoming transfers.
 //
-// TODO(M1): accept a TCP connection on a fixed port and write the incoming file.
 // TODO(M3): start the discovery announcer.
 // TODO(M4): wrap the listener in TLS and prompt the user to accept offers.
 func runListen(args []string) error {
@@ -22,6 +21,8 @@ func runListen(args []string) error {
 
 	port := fs.Int("port", 6767, "TCP port")
 	dir := fs.String("dir", ".", "directory to receive files")
+	discard := fs.Bool("discard", false, "read incoming data and throw it away (network-only benchmark)")
+	buf := fs.Int("buf", 0, "copy buffer size in bytes (0 = io.Copy default)")
 
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -38,6 +39,10 @@ func runListen(args []string) error {
 		return fmt.Errorf("invalid port %d", *port)
 	}
 
+	if *buf < 0 {
+		return fmt.Errorf("invalid buffer size %d", *buf)
+	}
+
 	if err := os.MkdirAll(*dir, 0o755); err != nil {
 		return err
 	}
@@ -47,9 +52,9 @@ func runListen(args []string) error {
 		return err
 	}
 
-	slog.Info("listening on", "port", *port)
-
 	defer ln.Close()
-	r := &transfer.Receiver{Dir: *dir}
+	slog.Info("listening on", "port", *port, "dir", *dir, "discard", *discard, "buf", *buf)
+
+	r := &transfer.Receiver{Dir: *dir, Discard: *discard, BufSize: *buf}
 	return r.Serve(ln)
 }
