@@ -36,6 +36,26 @@ Accept? [y/N] (60s) y
 - `tls.Server` / `tls.Client` wrapping an existing `net.Conn`; `ConnectionState()`
 - TOFU (SSH `known_hosts`), Short Authentication Strings (Bluetooth numeric comparison, Signal safety numbers)
 
+## Reading
+
+⭐ = read before coding.
+
+### TLS
+
+- ⭐ [The Illustrated TLS 1.3 Connection](https://tls13.xargs.org/): every byte of a real handshake, explained. Best way to "see" TLS 1.3
+- ⭐ [`crypto/tls`](https://pkg.go.dev/crypto/tls): read the `Config` doc comments for `InsecureSkipVerify`, `VerifyConnection`, `VerifyPeerCertificate`, `ClientAuth`. The resumption caveat is written there
+- [`crypto/x509`](https://pkg.go.dev/crypto/x509): `CreateCertificate`, `Certificate.Raw`
+- [RFC 8446](https://www.rfc-editor.org/rfc/rfc8446): reference only. §2 (protocol overview) is readable on its own
+
+### Identity, pinning, pairing
+
+- ⭐ [Syncthing Device IDs](https://docs.syncthing.net/dev/device-ids.html): device ID = SHA-256 of the cert, TLS with self-signed certs + pinning. Same model as ferry
+- [Trust on first use](https://en.wikipedia.org/wiki/Trust_on_first_use): the SSH `known_hosts` model and its weak point
+- [Signal: safety numbers](https://signal.org/blog/safety-number-updates/): how humans compare a short value to detect MITM
+- [RFC 6189 §7 (ZRTP SAS)](https://www.rfc-editor.org/rfc/rfc6189#section-7): Short Authentication String, formally. Skim it to see why a few digits are enough when derived from both sides' keys
+- [Magic Wormhole docs](https://magic-wormhole.readthedocs.io/en/latest/): a file-transfer tool with short codes (PAKE). Good contrast to your PIN design
+- [LocalSend protocol](https://github.com/localsend/protocol): HTTPS with self-signed certs + fingerprint. See how they handle trust
+
 ## Tasks
 
 **Identity (3.5 h)**

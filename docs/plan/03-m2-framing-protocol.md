@@ -20,6 +20,46 @@ corrupt file under its final name.
 - `os.File.Sync` (fsync) and `os.Rename` atomicity (same filesystem only)
 - Protocol state machines: which message is legal in which state
 
+## Reading
+
+⭐ = read before coding. The rest you can look up when you reach the task.
+
+### Framing & binary encoding
+
+- ⭐ [Length-prefix framing](https://eli.thegreenplace.net/2011/08/02/length-prefix-framing-for-protocol-buffers) (Eli Bendersky): why TCP needs framing, and the exact `[len][payload]` pattern
+- ⭐ [RFC 9113 §4.1 Frame Format](https://www.rfc-editor.org/rfc/rfc9113#section-4.1) (HTTP/2): a real `[length][type][flags][payload]` frame. Also look at §5.1 *Stream States* for how a protocol describes which frame is legal when
+- [Beej's Guide §7.5–7.6](https://beej.us/guide/bgnet/html/#serialization): *Serialization* and *Data Encapsulation*, i.e. how to pack fields into bytes and frame them with a length header
+- [The byte order fallacy](https://commandcenter.blogspot.com/2012/04/byte-order-fallacy.html) (Rob Pike): why `binary.BigEndian.Uint32(b)` is enough and you never need to know the host's endianness
+- [`encoding/binary`](https://pkg.go.dev/encoding/binary): read `ByteOrder`, `AppendByteOrder`. `binary.Read/Write` use reflection, which is why they're slower
+- [`bufio`](https://pkg.go.dev/bufio): `Reader`, `Writer`, `Flush`. Once a `bufio.Reader` wraps the conn, read **only** through it, because it may already hold bytes you want
+- [`io`](https://pkg.go.dev/io): `ReadFull`, `LimitReader`, `TeeReader`, `MultiWriter`
+
+### Real protocols to steal ideas from (skim, don't copy)
+
+- ⭐ [Syncthing BEP v1](https://docs.syncthing.net/specs/bep-v1.html): a LAN file-sync protocol with hello, length-prefixed messages, file index, block hashes. Closest to ferry
+- [LocalSend protocol](https://github.com/localsend/protocol): a LAN file-transfer app (HTTP-based). Useful for the OFFER/ACCEPT flow and how they describe files
+
+### Hashing
+
+- [`hash`](https://pkg.go.dev/hash) + [`crypto/sha256`](https://pkg.go.dev/crypto/sha256): a `hash.Hash` is an `io.Writer`, so `io.MultiWriter(file, hasher)` hashes as you write
+
+### Paths & traversal
+
+- ⭐ [Traversal-resistant file APIs](https://go.dev/blog/osroot) (Go blog): `filepath.IsLocal`, `os.Root`, and why string checks alone aren't enough
+- [Zip Slip](https://security.snyk.io/research/zip-slip-vulnerability): the same bug class in archive extractors. It's exactly the attack a malicious OFFER would try
+- [Windows: Naming files](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file): reserved names (`CON`, `NUL`, `COM1`…), invalid characters, `MAX_PATH`
+- [`path/filepath`](https://pkg.go.dev/path/filepath): `WalkDir`, `Rel`, `ToSlash`, `FromSlash`
+
+### Safe writes (fsync + rename)
+
+- ⭐ [Files are hard](https://danluu.com/file-consistency/) (Dan Luu): why "write then rename" isn't automatically safe
+- [Ensuring data reaches disk](https://lwn.net/Articles/457667/) (LWN): what `fsync` really does. Includes the "also fsync the directory" detail
+- [google/renameio](https://github.com/google/renameio): a small Go implementation of temp file → fsync → rename. Short enough to read the whole source
+
+### Fuzzing
+
+- [Go fuzzing tutorial](https://go.dev/doc/tutorial/fuzz) then the [reference](https://go.dev/doc/security/fuzz/)
+
 ## Wire format (starting point, record final choices in PROTOCOL.md)
 
 ```

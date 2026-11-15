@@ -2,6 +2,13 @@
 
 **Budget:** 6 h · **When:** Week 4, sessions 4.5–4.6 · **Tag:** `v0.1.0`
 
+## Reading
+
+- ⭐ [Publishing a module](https://go.dev/doc/modules/publishing) + [Module version numbering](https://go.dev/doc/modules/version-numbers): tags, semver, why tags are immutable in the proxy
+- [GoReleaser quick start](https://goreleaser.com/quick-start/): `goreleaser check`, `--snapshot`, what ends up in `dist/`
+- [proxy.golang.org](https://proxy.golang.org/): how the module proxy and checksum DB cache versions
+- [iperf3 docs](https://iperf.fr/iperf-doc.php): `-P` (parallel), `-R` (reverse), `-t` (duration)
+
 ## A. Release pipeline (3 h)
 
 Already in the skeleton:

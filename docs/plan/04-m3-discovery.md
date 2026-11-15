@@ -25,6 +25,19 @@ Office-PC         9f8e7d6c    192.168.1.31:47701   3s ago
 - `time.Ticker`, `context.Context`, `sync.RWMutex`-protected map
 - Broadcast (`255.255.255.255` / subnet broadcast) as a fallback when multicast is blocked
 
+## Reading
+
+⭐ = read before coding.
+
+- ⭐ [Syncthing Local Discovery v4](https://docs.syncthing.net/specs/localdisco-v4.html): a short, real LAN discovery spec (UDP broadcast + multicast, magic number, announce interval). Almost exactly M3
+- ⭐ [LocalSend protocol](https://github.com/localsend/protocol): multicast announce + response flow, the default group/port, what goes in an announcement
+- [Beej's Guide](https://beej.us/guide/bgnet/html/): §7.7 *Broadcast Packets* (and §2.1 on datagram sockets)
+- [`net`](https://pkg.go.dev/net): `ListenMulticastUDP`, `Interfaces`, `Interface.Flags`. Read the doc comment on `ListenMulticastUDP`; it says when to use `x/net/ipv4` instead
+- [`golang.org/x/net/ipv4`](https://pkg.go.dev/golang.org/x/net/ipv4): package docs have a full multicast example (`JoinGroup` per interface, `SetMulticastLoopback`)
+- [RFC 2365](https://www.rfc-editor.org/rfc/rfc2365): admin-scoped `239.0.0.0/8`, why it's the right range for a private app
+- [RFC 6762 (mDNS)](https://www.rfc-editor.org/rfc/rfc6762): skim §5–§10 for ideas on announce intervals, TTL, conflict handling. Don't implement mDNS
+- [Go Concurrency Patterns: Context](https://go.dev/blog/context) + [`context`](https://pkg.go.dev/context): stopping the announcer/listener goroutines cleanly
+
 ## Announcement packet
 
 Keep it small (< 512 B), versioned, and parseable without trusting it:

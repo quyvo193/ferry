@@ -9,6 +9,30 @@
 | C. Small-file batching | 2 | Should |
 | D. Parallel streams | 6 | **Could**, time-boxed, cut first |
 
+## Reading
+
+⭐ = read before coding.
+
+### Resume
+
+- [`os`](https://pkg.go.dev/os): `File.Seek`, `File.Stat`, `File.Truncate`, `File.ReadAt`/`WriteAt`
+- [Syncthing BEP v1](https://docs.syncthing.net/specs/bep-v1.html): block-based transfers with per-block hashes. A good model if you go with per-range hashes (decision D.1b)
+- [rsync technical report](https://rsync.samba.org/tech_report/): the classic on "what does the other side already have". Short, optional
+
+### Progress
+
+- [`sync/atomic`](https://pkg.go.dev/sync/atomic): `atomic.Int64`
+- [Exponential smoothing](https://en.wikipedia.org/wiki/Exponential_smoothing): the EMA formula for a smooth speed number
+- [`golang.org/x/term`](https://pkg.go.dev/golang.org/x/term): `IsTerminal`, `GetSize` (cleaner than the `ModeCharDevice` trick)
+- [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code): `\r`, `ESC[2K` (clear line), `ESC[K`
+
+### Performance & parallel streams
+
+- ⭐ [Profiling Go programs](https://go.dev/blog/pprof) + [Diagnostics](https://go.dev/doc/diagnostics): profile *before* trying parallel streams or batching
+- ⭐ [Pipelines and cancellation](https://go.dev/blog/pipelines) (Go blog): fan-out/fan-in, stopping all goroutines on first error
+- [`errgroup`](https://pkg.go.dev/golang.org/x/sync/errgroup): "first error cancels the rest", already done for you
+- [Optimizing TCP for high throughput](https://blog.cloudflare.com/optimizing-tcp-for-high-throughput-and-low-latency/) (Cloudflare): why one stream can underuse a link and when more streams help
+
 ---
 
 ## A. Resume (6 h)

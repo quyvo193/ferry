@@ -14,6 +14,17 @@ Testing time is already inside each milestone's budget. It isn't a separate phas
 | Benchmarks | Codec, hashing, copy loop | `testing.B`, `-benchmem` | M2, M5 |
 | Manual | Real machines, real networks, real OSes | checklist below | End of each milestone |
 
+## Reading
+
+- ⭐ [Table-driven tests](https://go.dev/wiki/TableDrivenTests) (Go wiki)
+- ⭐ [Go fuzzing tutorial](https://go.dev/doc/tutorial/fuzz) + [reference](https://go.dev/doc/security/fuzz/): corpus, `testdata/fuzz`, `-fuzztime`
+- ⭐ [`testing/iotest`](https://pkg.go.dev/testing/iotest): ready-made bad readers/writers (`OneByteReader`, `HalfReader`, `TimeoutReader`, `ErrReader`). Use them before writing `faultConn`
+- [`net.Pipe`](https://pkg.go.dev/net#Pipe): in-memory `net.Conn` pair for unit tests without real sockets
+- [Race detector](https://go.dev/doc/articles/race_detector)
+- [More predictable benchmarking with `testing.B.Loop`](https://go.dev/blog/testing-b-loop) (Go blog) + [`testing`](https://pkg.go.dev/testing) benchmark docs
+- [Learn Go with Tests](https://quii.gitbook.io/learn-go-with-tests): if you want a TDD-style walkthrough
+- [100 Go Mistakes](https://100go.co/): skim the testing and concurrency chapters
+
 ## Fuzz targets (minimum)
 
 - `FuzzReadFrame`: arbitrary bytes into the frame reader → never panic, never allocate > max frame

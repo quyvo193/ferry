@@ -38,12 +38,14 @@ Parallel streams (≈ 6 h in M5) also act as the **second buffer**: if you're be
 
 ## How to use this plan
 
-- Each milestone file has the same sections: **Goal → Concepts to learn → Tasks (with hour
+- Each milestone file has the same sections: **Goal → Concepts to learn → Reading → Tasks (with hour
   estimates) → Design decisions → Pitfalls → Tests → Done when → Stretch**.
 - **Design decisions** are open questions on purpose. Pick one, write down *why* (a line in
   `PROTOCOL.md` or a commit message), and move on. Don't stay stuck on them.
 - Tick checkboxes as you go. Record actual hours next to the estimate (e.g. `(2h → 3.5h)`) so
   you learn to estimate better.
+- **Reading** lists vetted links per concept. ⭐ = read before coding; the rest is lookup material for
+  when you hit that task. Respect working rule 7 (time-box research).
 
 ## Working rules
 

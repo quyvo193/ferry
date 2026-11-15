@@ -24,6 +24,17 @@ A$ ferry send 192.168.1.20:47701 ./big.bin
 - Socket buffers: `SetReadBuffer` / `SetWriteBuffer`; Nagle (`SetNoDelay`) doesn't matter for bulk
 - Units: MB vs MiB, MB/s vs Mbit/s (1 Gbit Ethernet ≈ 117 MB/s of payload, best case)
 
+## Reading
+
+⭐ = read before coding.
+
+- ⭐ [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/html/): C, but the best intro to sockets. Read §2.1 (stream vs datagram sockets) and §7.4 *Handling Partial send()s*
+- ⭐ [`net`](https://pkg.go.dev/net) package overview + [`io`](https://pkg.go.dev/io): `Reader`/`Writer` contracts, `Copy`, `ReaderFrom`/`WriterTo`, `ReadFull`
+- [*Network Programming with Go*](https://nostarch.com/networkprogrammingwithgo) (Adam Woodbeck, No Starch): ch. 3–4 cover TCP, deadlines, `io.Copy` in Go. Book, worth it if you like a guided path
+- [RFC 9293 (TCP)](https://www.rfc-editor.org/rfc/rfc9293): reference only. Look up connection close / half-close when you do `CloseWrite`
+- [Optimizing TCP for high throughput](https://blog.cloudflare.com/optimizing-tcp-for-high-throughput-and-low-latency/) (Cloudflare): socket buffers, window size, why buffer tuning matters on fast links
+- [iperf3 docs](https://iperf.fr/iperf-doc.php): flags for the baseline (`-c`, `-s`, `-P`, `-R`, `-t`)
+
 ## Tasks
 
 - [x] Push skeleton to GitHub, confirm CI green on 3 OSes (0.5 h)
