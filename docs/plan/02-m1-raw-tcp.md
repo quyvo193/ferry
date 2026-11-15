@@ -26,16 +26,16 @@ A$ ferry send 192.168.1.20:47701 ./big.bin
 
 ## Tasks
 
-- [ ] Push skeleton to GitHub, confirm CI green on 3 OSes (0.5 h)
-- [ ] `flag.FlagSet` for `listen` (`--port`, `--dir`) and `send` (`<ip:port> <file>`) (0.5 h)
-- [ ] Receiver: accept loop, one goroutine per conn, create file in `--dir` (1.5 h)
-- [ ] Sender: open file, dial, `io.CopyBuffer`, half-close, wait for receiver to close (1 h)
-- [ ] Mini header before data so the receiver knows the filename + size
+- [x] Push skeleton to GitHub, confirm CI green on 3 OSes (0.5 h)
+- [x] `flag.FlagSet` for `listen` (`--port`, `--dir`) and `send` (`<ip:port> <file>`) (0.5 h)
+- [x] Receiver: accept loop, one goroutine per conn, create file in `--dir` (1.5 h)
+- [x] Sender: open file, dial, `io.CopyBuffer`, half-close, wait for receiver to close (1 h)
+- [x] Mini header before data so the receiver knows the filename + size
       (e.g. `[u16 name_len][name][u64 size]`). This is a precursor to M2 framing (1 h)
-- [ ] Timing on both sides: bytes, duration, MB/s, Mbit/s (0.5 h)
-- [ ] `--discard` debug flag on the receiver: write to `io.Discard` to isolate network vs disk (0.25 h)
-- [ ] Loopback test in `transfer` package with `t.TempDir()` (1 h)
-- [ ] Generate test data: 1 × 4 GiB random file, 10 000 × 4 KiB files (script in `scripts/`, 0.25 h)
+- [x] Timing on both sides: bytes, duration, MB/s, Mbit/s (0.5 h)
+- [x] `--discard` debug flag on the receiver: write to `io.Discard` to isolate network vs disk (0.25 h)
+- [x] Loopback test in `transfer` package with `t.TempDir()` (1 h)
+- [x] Generate test data: 1 × 4 GiB random file, 10 000 × 4 KiB files (script in `scripts/`, 0.25 h)
 - [ ] Buffer sweep 32 KiB / 256 KiB / 1 MiB / 4 MiB on loopback + Ethernet + Wi-Fi (1.5 h)
 - [ ] iperf3 baseline between the same two machines; fill BENCHMARKS.md (0.5 h)
 
