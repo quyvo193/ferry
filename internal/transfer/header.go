@@ -75,7 +75,7 @@ func writeHeader(w io.Writer, h Header) error {
 	return err
 }
 
-func validate(name string, size int) error {
+func validate(name string, size int64) error {
 	if len(name) == 0 || len(name) > maxNameLen || !isSafeName(name) {
 		return fmt.Errorf("%w: %q", ErrInvalidName, name)
 	}

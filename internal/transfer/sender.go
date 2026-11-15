@@ -3,7 +3,6 @@ package transfer
 import (
 	"fmt"
 	"io"
-	"log/slog"
 	"net"
 	"os"
 	"time"
@@ -35,7 +34,7 @@ func (s *Sender) Send(addr, path string) error {
 		Size: fi.Size(),
 	}
 
-	if err := validate(h.Name, int(h.Size)); err != nil {
+	if err := validate(h.Name, h.Size); err != nil {
 		return err
 	}
 
@@ -54,7 +53,7 @@ func (s *Sender) sendFile(conn net.Conn, src io.Reader, h Header) error {
 		return fmt.Errorf("write header: %w", err)
 	}
 
-	n, err := io.CopyN(conn, src, h.Size)
+	n, err := copyN(conn, src, h.Size, s.BufSize)
 	if err != nil {
 		return fmt.Errorf("send data: sent %d/%d bytes: %w", n, h.Size, err)
 	}
@@ -73,13 +72,6 @@ func (s *Sender) sendFile(conn net.Conn, src io.Reader, h Header) error {
 		return fmt.Errorf("wait for receiver: %w", err)
 	}
 
-	secs := time.Since(start).Seconds()
-	slog.Info("sent",
-		"name", h.Name,
-		"bytes", n,
-		"secs", secs,
-		"MB/s", float64(n)/1e6/secs,
-	)
-
+	logRate("sent", h.Name, n, time.Since(start))
 	return nil
 }

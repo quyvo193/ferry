@@ -14,6 +14,7 @@ import (
 type Receiver struct {
 	Dir     string
 	Discard bool
+	BufSize int
 }
 
 func (r *Receiver) Serve(ln net.Listener) error {
@@ -49,20 +50,13 @@ func (r *Receiver) receive(src io.Reader) error {
 		return err
 	}
 
-	secs := time.Since(start).Seconds()
-	slog.Info("received",
-		"name", h.Name,
-		"bytes", n,
-		"secs", secs,
-		"MB/s", float64(n)/1e6/secs,
-	)
-
+	logRate("received", h.Name, n, time.Since(start))
 	return nil
 }
 
 func (r *Receiver) store(src io.Reader, h Header) (int64, error) {
 	if r.Discard {
-		return io.CopyN(io.Discard, src, h.Size)
+		return copyN(io.Discard, src, h.Size, r.BufSize)
 	}
 
 	final := filepath.Join(r.Dir, h.Name)
@@ -83,7 +77,7 @@ func (r *Receiver) store(src io.Reader, h Header) (int64, error) {
 		}
 	}()
 
-	n, err := io.CopyN(f, src, h.Size)
+	n, err := copyN(f, src, h.Size, r.BufSize)
 	if err != nil {
 		return n, fmt.Errorf("copy data: got %d/%d bytes: %w", n, h.Size, err)
 	}
